@@ -1,0 +1,16 @@
+# frontend
+frontend/node_modules
+frontend/dist
+
+# backend
+backend/target
+
+# IDE
+.idea
+.vscode
+
+# env
+.env
+
+# logs
+*.log
