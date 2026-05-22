@@ -8,16 +8,14 @@ COPY . .
 # Di chuyển vào thư mục backend
 WORKDIR /app/backend
 
-# CẤP QUYỀN THỰC THI CHO FILE mvnw (Thêm dòng này để sửa lỗi Permission denied)
-RUN chmod +x ./mvnw
-
-# Chạy lệnh đóng gói
-RUN ./mvnw clean package -DskipTests
+# Thay vì dùng ./mvnw, ta dùng trực tiếp lệnh 'mvn' có sẵn trong môi trường của Image Maven
+RUN mvn clean package -DskipTests
 
 # --- BƯỚC 2: CHẠY ỨNG DỤNG VỚI IMAGE JAVA NHỎ GỌN ---
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
+# Copy file .jar từ tầng build sang để chạy
 COPY --from=build /app/backend/target/*.jar app.jar
 
 EXPOSE 8080
