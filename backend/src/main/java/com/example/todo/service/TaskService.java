@@ -4,6 +4,9 @@ import com.example.todo.dto.TaskRequest;
 import com.example.todo.model.Task;
 import com.example.todo.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,28 @@ public class TaskService {
         Map<String, Object> response = new HashMap<>();
 
         response.put("tasks", tasks);
+        response.put("activeCount", activeCount);
+        response.put("completeCount", completeCount);
+
+        return response;
+    }
+
+    public Map<String, Object> getTasksPagedResponse(Pageable pageable) {
+        // 1. Lấy dữ liệu phân trang từ Database
+        Page<Task> taskPage = taskRepository.findAll(pageable);
+
+        // 2. Đếm số lượng active/complete dựa trên TOÀN BỘ database (hoặc dựa trên
+        // trang hiện tại tùy bạn)
+        List<Task> allTasks = taskRepository.findAll();
+        long activeCount = allTasks.stream().filter(task -> "active".equals(task.getStatus())).count();
+        long completeCount = allTasks.stream().filter(task -> "complete".equals(task.getStatus())).count();
+
+        // 3. Gom dữ liệu trả về cho Frontend
+        Map<String, Object> response = new HashMap<>();
+        response.put("tasks", taskPage.getContent()); // Danh sách task của TRANG HIỆN TẠI
+        response.put("currentPage", taskPage.getNumber() + 1); // Trang hiện tại (bắt đầu từ số 0)
+        response.put("totalItems", taskPage.getTotalElements()); // Tổng số lượng task đang có
+        response.put("totalPages", taskPage.getTotalPages()); // Tổng số trang tính được
         response.put("activeCount", activeCount);
         response.put("completeCount", completeCount);
 
